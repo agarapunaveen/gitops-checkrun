@@ -1,0 +1,13 @@
+name: discussion workflow
+run-name: discussions
+on:
+ discussion:
+  types: [ created,edited ]
+jobs:
+ echo-build:
+  runs-on: ubuntu-latest
+  steps:
+   - name: discussions
+     run: |
+      echo "discussion create"
+      echo "discusion edited"
