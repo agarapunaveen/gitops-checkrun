@@ -1,0 +1,31 @@
+name: Delete Event Workflow
+
+on:
+  delete:  # Listens for delete events (branch or tag deletion)
+
+jobs:
+  handle-delete-event:
+    name: Handle Delete Event
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Display Event Information
+        env:
+          REF_TYPE: ${{ github.event.ref_type }}  # branch or tag
+          REF_NAME: ${{ github.event.ref }}       # name of the deleted branch or tag
+          REPO: ${{ github.repository }}
+          DELETED_BY: ${{ github.event.sender.login }}
+        run: |
+          echo "Handling Delete Event"
+          echo "Deleted Ref Type: $REF_TYPE"
+          echo "Deleted Ref Name: $REF_NAME"
+          echo "Repository: $REPO"
+          echo "Deleted by: $DELETED_BY"
+
+      - name: Conditional Action on Branch Deletion
+        if: ${{ github.event.ref_type == 'branch' }}
+        run: echo "A branch named ${{ github.event.ref }} was deleted."
+
+      - name: Conditional Action on Tag Deletion
+        if: ${{ github.event.ref_type == 'tag' }}
+        run: echo "A tag named ${{ github.event.ref }} was deleted."
