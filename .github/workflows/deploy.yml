@@ -1,49 +1,36 @@
-name: Deployment Workflow
+name: Deployment Status Workflow
 
 on:
-  push:
-    branches:
-      - main  # Deploy only on push to the main branch
-    tags:
-      - 'v*'  # Optional: deploy on versioned tags
+  deployment_status:
+    types: [success, failure, in_progress]  # Listens for deployment status updates
 
 jobs:
-  deploy:
-    name: Deploy Application
+  handle-deployment-status:
+    name: Handle Deployment Status
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Code
-        uses: actions/checkout@v3
-
-      - name: Set up Node.js (if applicable)
-        uses: actions/setup-node@v3
-        with:
-          node-version: '16'  # Specify your required version
-
-      - name: Install Dependencies
-        run: npm install
-
-      - name: Run Build Script (if applicable)
-        run: npm run build
-
-      - name: Upload Artifacts (if needed)
-        uses: actions/upload-artifact@v3
-        with:
-          name: build-output
-          path: ./dist  # Adjust path to your build directory
-
-      - name: Deploy to AWS (example)
-        uses: aws-actions/configure-aws-credentials@v3
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: us-east-1
-
-      - name: Deploy Application
+      - name: Display Deployment Status Information
+        env:
+          STATUS: ${{ github.event.deployment_status.state }}
+          ENVIRONMENT: ${{ github.event.deployment.environment }}
+          DEPLOYMENT_URL: ${{ github.event.deployment.url }}
+          STATUS_CREATOR: ${{ github.event.sender.login }}
         run: |
-          aws s3 sync ./dist s3://your-s3-bucket-name --delete
-          aws cloudfront create-invalidation --distribution-id YOUR_DISTRIBUTION_ID --paths "/*"
+          echo "Deployment Status Update"
+          echo "Status: $STATUS"
+          echo "Environment: $ENVIRONMENT"
+          echo "Deployment URL: $DEPLOYMENT_URL"
+          echo "Status updated by: $STATUS_CREATOR"
 
-      - name: Notify on Deployment Success
-        run: echo "Deployment successful to production environment."
+      - name: Conditional Action on Success
+        if: ${{ github.event.deployment_status.state == 'success' }}
+        run: echo "Deployment to $ENVIRONMENT succeeded. Performing post-deployment tasks."
+
+      - name: Conditional Action on Failure
+        if: ${{ github.event.deployment_status.state == 'failure' }}
+        run: echo "Deployment to $ENVIRONMENT failed. Notifying the team and rolling back."
+
+      - name: Log In-Progress Status
+        if: ${{ github.event.deployment_status.state == 'in_progress' }}
+        run: echo "Deployment to $ENVIRONMENT is in progress."
