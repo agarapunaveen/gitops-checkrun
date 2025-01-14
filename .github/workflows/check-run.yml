@@ -1,0 +1,36 @@
+name: Check Run Workflow
+
+on:
+  check_run:
+    types: [created, completed, rerequested]  # Specifies the check run event types to trigger on
+
+jobs:
+  handle-check-run:
+    name: Handle Check Run Event
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Print Check Run Information
+        env:
+          CHECK_RUN_ID: ${{ github.event.check_run.id }}
+          CHECK_RUN_NAME: ${{ github.event.check_run.name }}
+          CHECK_RUN_STATUS: ${{ github.event.check_run.status }}
+          CHECK_RUN_CONCLUSION: ${{ github.event.check_run.conclusion }}
+          REPO: ${{ github.repository }}
+          COMMIT_SHA: ${{ github.event.check_run.head_sha }}
+        run: |
+          echo "Handling Check Run Event"
+          echo "Check Run ID: $CHECK_RUN_ID"
+          echo "Check Run Name: $CHECK_RUN_NAME"
+          echo "Check Run Status: $CHECK_RUN_STATUS"
+          echo "Check Run Conclusion: $CHECK_RUN_CONCLUSION"
+          echo "Repository: $REPO"
+          echo "Commit SHA: $COMMIT_SHA"
+
+      - name: Conditional Action on Check Run Conclusion
+        if: ${{ github.event.check_run.conclusion == 'failure' }}
+        run: echo "Check run failed. Take appropriate action."
+
+      - name: Conditional Action for Rerequested Event
+        if: ${{ github.event.action == 'rerequested' }}
+        run: echo "Check run was rerequested. Retrying actions."
