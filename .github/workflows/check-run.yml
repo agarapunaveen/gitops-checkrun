@@ -1,6 +1,7 @@
 name: Check Run Workflow
 
 on:
+  push:
   check_run:
     types: [created, completed, rerequested]  # Specifies the check run event types to trigger on
 
