@@ -1,0 +1,13 @@
+name: pull request review and comment
+run-name: pull request review and comment
+on:
+ pull_request_review:
+  types: 
+   - submitted
+jobs:
+ build-job:
+  runs-on: ubuntu-latest
+  steps:
+   - name: pull_request
+     run: echo " pull reqiest review submitted "
+     
