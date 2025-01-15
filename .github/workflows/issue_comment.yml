@@ -1,5 +1,6 @@
 on: issue_comment
-
+name: issue_comment
+run-name: issue_comment workflow
 jobs:
   pr_commented:
     # This job only runs for pull request comments
