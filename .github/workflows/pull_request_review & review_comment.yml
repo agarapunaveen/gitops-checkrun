@@ -9,5 +9,5 @@ jobs:
   runs-on: ubuntu-latest
   steps:
    - name: pull_request
-     run: echo " pull reqiest review submitted "
+     run: echo " pull reqiest reviews submitted "
      
